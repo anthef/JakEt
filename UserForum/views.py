@@ -1,6 +1,8 @@
 from datetime import timezone
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
+from Authenticate.models import UserData
 from .models import Discussion, Reply
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
@@ -97,10 +99,55 @@ def send_reply(request, id):
 def show_json(request):
     discussions = Discussion.objects.all()
     replies = Reply.objects.all()
+
+    def get_profile_image_url(user, request):
+        try:
+            user_data = user.auth 
+            if user_data.profile_picture and hasattr(user_data.profile_picture, 'url'):
+                profile_image_url = user_data.profile_picture.url
+            else:
+                profile_image_url = '/static/images/default_profile.png'
+        except ObjectDoesNotExist:
+            profile_image_url = '/static/images/default_profile.png'
+        except Exception:
+            profile_image_url = '/static/images/default_profile.png'
+
+        if not profile_image_url.startswith('http'):
+            profile_image_url = request.build_absolute_uri(profile_image_url)
+
+        return profile_image_url
+
+    discussion_list = []
+    for discussion in discussions:
+        discussion_data = {
+            'id': discussion.id,
+            'owner': {
+                'username': discussion.owner.username,
+                'profile_image_url': get_profile_image_url(discussion.owner, request),
+            },
+            'topic': discussion.topic,
+            'started': discussion.started,
+            'last_reply': discussion.last_reply.sender.username if discussion.last_reply else None,
+        }
+        discussion_list.append(discussion_data)
+
+    reply_data = []
+    for reply in replies:
+        reply_data.append({
+            'discussion': reply.discussion.id,
+            'sender': {
+                'username': reply.sender.username,
+                'profile_image_url': get_profile_image_url(reply.sender, request),
+            },
+            'replied': reply.replied,
+            'message': reply.message,
+        })
+
     data = {
-        'discussions': json.loads(serializers.serialize('json', discussions)),
-        'replies': json.loads(serializers.serialize('json', replies))
+        'discussions': discussion_list,
+        'replies': reply_data,
     }
+
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
@@ -111,11 +158,37 @@ def get_replies(request, id):
         return JsonResponse({'status': 'error', 'message': 'Discussion not found'}, status=404)
 
     replies = Reply.objects.filter(discussion=discussion).order_by('replied')
+
+    reply_data = []
+    for reply in replies:
+        try:
+            user_data = reply.sender.auth  
+            if user_data.profile_picture and hasattr(user_data.profile_picture, 'url'):
+                profile_image_url = user_data.profile_picture.url
+            else:
+                profile_image_url = '/static/images/default_profile.png'
+        except UserData.DoesNotExist:
+            profile_image_url = '/static/images/default_profile.png'
+        except Exception:
+            profile_image_url = '/static/images/default_profile.png'
+        
+        if not profile_image_url.startswith('http'):
+            profile_image_url = request.build_absolute_uri(profile_image_url)
+        
+        reply_data.append({
+            'discussion': reply.discussion.id,
+            'sender': {
+                'username': reply.sender.username,
+                'profile_image_url': profile_image_url
+            },
+            'replied': reply.replied,
+            'message': reply.message
+        })
+
     return JsonResponse({
-        # 'replies': [model_to_dict(reply) for reply in replies],
-        'replies': json.loads(serializers.serialize('json', replies)),
-        'status': 'success'
-    })
+        'status': 'success',
+        'replies': reply_data
+    }, status=200)
 
 @csrf_exempt
 def add_discussion_flutter(request):
