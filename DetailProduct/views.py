@@ -283,11 +283,7 @@ def delete_review_flutter(request, review_id):
             'message': 'Metode request tidak diizinkan.'
         }, status=405)
 
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from .models import Phone, Review, UserData  # Pastikan import model yang benar
-from django.conf import settings
-
+@csrf_exempt
 def list_reviews_flutter(request, product_id):
     if request.method == 'GET':
         try:
@@ -296,7 +292,7 @@ def list_reviews_flutter(request, product_id):
             review_data = []
             for review in reviews:
                 try:
-                    user_data = review.user.auth  # Menggunakan related_name='auth'
+                    user_data = review.user.auth  
                     if user_data.profile_picture and hasattr(user_data.profile_picture, 'url'):
                         profile_image_url = user_data.profile_picture.url
                     else:
