@@ -9,6 +9,7 @@ import json
 from django.core import serializers
 
 @login_required
+@csrf_exempt
 def forum_view(request):
     discussions = Discussion.objects.all().order_by('-started')
     context = {
@@ -18,6 +19,7 @@ def forum_view(request):
     return render(request, 'user-forum.html', context)
 
 @login_required
+@csrf_exempt
 def add_discussion(request):
     if request.method == 'POST':
         topic = request.POST.get('topic')
@@ -48,6 +50,7 @@ def delete_discussion(request, discussion_id):
     
 
 @login_required
+@csrf_exempt
 def discussion_view(request, id):
     discussion = Discussion.objects.get(id=id)
     replies = Reply.objects.filter(discussion=discussion).order_by('replied')
@@ -90,6 +93,7 @@ def send_reply(request, id):
         'sender': {'username': new_reply.sender.username, 'profile_picture': new_reply.sender.profile_picture.url}
     }})
 
+@csrf_exempt
 def show_json(request):
     discussions = Discussion.objects.all()
     replies = Reply.objects.all()

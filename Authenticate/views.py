@@ -15,6 +15,7 @@ import json
 '''
 DJANGO WEB AUTHENTICATION
 '''
+@csrf_exempt
 def register(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -36,6 +37,7 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
+@csrf_exempt
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -57,7 +59,7 @@ def log_in(request):
     
     return render(request, 'login.html')
 
-
+@csrf_exempt
 def log_out(request):
     logout(request)
     response = HttpResponseRedirect(reverse('Homepage:home_section'))  

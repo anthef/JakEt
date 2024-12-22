@@ -17,6 +17,7 @@ from django.utils import timezone
 
 # WEB
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def product_detail(request, product_id):
     product = get_object_or_404(Phone, id=product_id)
     reviews = Review.objects.filter(product=product)
@@ -56,6 +57,7 @@ def toggle_favorite(request, phone_id):
     return JsonResponse({'is_favorite': is_favorite})
 
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def review_page(request, product_id):
     product = get_object_or_404(Phone, id=product_id)
     user_reviews = Review.objects.filter(product=product)
@@ -89,6 +91,7 @@ def review_page(request, product_id):
     return render(request, 'review_page.html', context)
 
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def edit_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     product_id = str(review.product.id)
@@ -114,6 +117,7 @@ def edit_review(request, review_id):
     return render(request, 'edit_review.html', context)
 
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
     product_id = review.product.id 

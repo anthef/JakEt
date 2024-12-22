@@ -3,7 +3,7 @@ import csv
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-
+@csrf_exempt
 def convert_inr_to_idr(price_in_inr):
     if not price_in_inr:  
         return "Price not available"
@@ -14,6 +14,7 @@ def convert_inr_to_idr(price_in_inr):
     except ValueError:
         return "Price not available"
 
+@csrf_exempt
 def load_devices_from_csv():
     devices = []
     try:

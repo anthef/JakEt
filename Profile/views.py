@@ -14,6 +14,7 @@ import base64
 from django.core.files.base import ContentFile
 
 @login_required(login_url='/authenticate')
+@csrf_exempt
 def profile_view(request):
     try:
         user_data = UserData.objects.get(user=request.user)
@@ -31,6 +32,7 @@ def profile_view(request):
         return redirect('Profile:create_profile')
 
 @login_required(login_url='/authenticate')
+@csrf_exempt
 def create_profile(request):
     if UserData.objects.filter(user=request.user).exists():
         return redirect('Profile:profile_view')
@@ -67,6 +69,7 @@ def create_profile(request):
     return render(request, 'create_profile.html', {'form': form})
 
 @login_required(login_url='/authenticate')
+@csrf_exempt
 def edit_profile(request):
     profile = UserData.objects.get(user=request.user)
     form = ProfileForm(request.POST or None, request.FILES or None, instance=profile)
@@ -102,6 +105,7 @@ def edit_profile(request):
 
 
 @login_required(login_url='/authenticate')
+@csrf_exempt
 def delete_profile_picture(request):
     if request.method == "POST":
         profile = UserData.objects.get(user=request.user)
@@ -114,10 +118,12 @@ def delete_profile_picture(request):
             return JsonResponse({'message': 'No profile picture to delete.'}, status=404)
     return JsonResponse({'message': 'Invalid request.'}, status=405)
 
+@csrf_exempt
 def show_xml(request):
     data = UserData.objects.all()
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+@csrf_exempt
 def show_json(request):
     data = UserData.objects.all()
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")

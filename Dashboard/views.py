@@ -24,6 +24,7 @@ from django.db.models import OuterRef, Exists, Count, Subquery, Q
 from django.contrib.auth.models import User
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def main_dashboard(request):
     products = Phone.objects.all().order_by('-id')
     context = {
@@ -33,6 +34,7 @@ def main_dashboard(request):
     return render(request, 'dashboard.html', context)
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def add_product(request):
     if request.method == 'POST':
         form = PhoneForm(request.POST)
@@ -53,6 +55,7 @@ def add_product(request):
     return render(request, 'product_form.html', context)
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def edit_product(request, product_id):
     product = get_object_or_404(Phone, pk=product_id)
     
@@ -73,6 +76,7 @@ def edit_product(request, product_id):
     return render(request, 'product_form.html', context)
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def delete_product(request, product_id):
     product = get_object_or_404(Phone, pk=product_id)
     product.delete()
@@ -80,6 +84,7 @@ def delete_product(request, product_id):
     return redirect('Dashboard:main_dashboard')
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def dashboard_tiket(request):
     users = UserData.objects.prefetch_related('tiket_set').all()
     users_with_appointments = []
@@ -95,17 +100,20 @@ def dashboard_tiket(request):
     return render(request, 'dashboard_tiket.html', {'users': users_with_appointments})
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def cancel_appointment(request, id):
     tiket = get_object_or_404(Tiket, pk=id)
     tiket.delete()
     return HttpResponseRedirect(reverse('Dashboard:dashboard_tiket'))
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def dashboard_service(request):
     service_centers = ServiceCenter.objects.all()
     return render(request, 'dashboard_service.html', {'service_centers': service_centers})
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def create_service_center(request):
     if request.method == "POST":
         form = ServiceForm(request.POST, request.FILES)
@@ -121,6 +129,7 @@ def create_service_center(request):
     return render(request, "create_service_center.html", {'form': form})
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def edit_service_center(request, id):
     service_center = get_object_or_404(ServiceCenter, pk=id)
     form = ServiceForm(request.POST or None, request.FILES or None, instance=service_center)
@@ -130,12 +139,14 @@ def edit_service_center(request, id):
     return render(request, "edit_service_center.html", {'form': form})
 
 @staff_member_required(login_url='/authenticate/login')
+@csrf_exempt
 def delete_service_center(request, id):
     service_center = get_object_or_404(ServiceCenter, pk=id)
     service_center.delete()
     return HttpResponseRedirect(reverse('Dashboard:dashboard_service'))
 
 @login_required
+@csrf_exempt
 def chat_dashboard(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'Unauthorized'}, status=403)

@@ -28,6 +28,7 @@ def favorite_list(request):
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     
 @login_required(login_url='/authenticate/login/')
+@csrf_exempt
 def favorite_list_web(request):
     if request.method == 'GET':
         favorites = Favorite.objects.filter(user=request.user)
@@ -36,6 +37,7 @@ def favorite_list_web(request):
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 @login_required(login_url='/authenticate/login/')
+@csrf_exempt
 def remove_favorite_web(request, phone_id):
     if request.method == 'POST':
         phone = get_object_or_404(Phone, id=phone_id)
@@ -60,7 +62,6 @@ def show_wishlist_json(request):
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 @csrf_exempt
-@login_required  # Ensure the user is authenticated
 def add_to_favorite_flutter(request):
     logger.debug("add_to_favorite_flutter called by user: %s", request.user)
     if request.method == 'POST':

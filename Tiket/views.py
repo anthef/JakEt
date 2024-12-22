@@ -13,6 +13,7 @@ from Authenticate.models import UserData
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+@csrf_exempt
 def create_tiket(request, id):
     service_center = get_object_or_404(ServiceCenter, pk=id)
     if request.method == "POST":
@@ -33,7 +34,7 @@ def create_tiket(request, id):
     return render(request, "make_appointment.html", context)
 
 
-
+@csrf_exempt
 def reschedule_appointment(request, id):
     # Get tiket berdasarkan id
     tiket = get_object_or_404(Tiket, pk=id)
@@ -58,11 +59,12 @@ def cancel_appointment(request, id):
     
     return render(request, 'confirm_cancel.html', {'tiket': tiket})
 
-
+@csrf_exempt
 def show_xml(request):
     data = Tiket.objects.all()
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+@csrf_exempt
 def show_json(request):
     if request.user.is_authenticated:
         user_data = UserData.objects.get(user=request.user)
@@ -86,11 +88,12 @@ def show_json(request):
     else:
         return JsonResponse([], safe=False)
 
-
+@csrf_exempt
 def show_xml_by_id(request, id):
     data = Tiket.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
 
+@csrf_exempt
 def show_json_by_id(request, id):
     data = Tiket.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")

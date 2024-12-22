@@ -15,7 +15,7 @@ from jaket.settings import BASE_DIR
 from django.core.files import File
 from Authenticate.models import UserData
 
-
+@csrf_exempt
 def show_service_page(request):
     dataset_path = os.path.join(BASE_DIR, 'dataset', 'service_center', 'service_centers.json')
     if not ServiceCenter.objects.exists():
@@ -41,6 +41,7 @@ def show_service_page(request):
     return render(request, "service_page.html", context)
 
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def create_service_center(request):
     if request.method == "POST":
         form = ServiceForm(request.POST, request.FILES)

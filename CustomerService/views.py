@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.contrib.auth.models import User
 
 @login_required
+@csrf_exempt
 def customer_service(request, user_id=None):
     if request.user.is_superuser and user_id:
         viewing_user = User.objects.get(id=user_id)
@@ -80,6 +81,7 @@ def send_message(request, user_id=None):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 @login_required
+@csrf_exempt
 def get_messages(request):
     # Get messages after a certain timestamp
     last_msg_time = request.GET.get('after', None)

@@ -89,7 +89,7 @@ def toggle_favorite(request, phone_id):
     else:
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     
-
+@csrf_exempt
 def search_results(request):
     query = request.GET.get('q')
     brand_filter = request.GET.get('brand')
@@ -131,6 +131,7 @@ def search_results(request):
     return render(request, 'search_results.html', context)
 
 @login_required(login_url='/authenticate/login')
+@csrf_exempt
 def search_suggestions(request):
     query = request.GET.get('q', '')
     if query:
@@ -141,29 +142,14 @@ def search_suggestions(request):
     return JsonResponse([], safe=False)
 
 # Flutter Views
+@csrf_exempt
 def show_json(request):
     data = Phone.objects.all()
     return HttpResponse(serializers.serialize("json",data),content_type='application/json')
 
+@csrf_exempt
 def show_json_by_id(request, id):
     data = Phone.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
 
-# @csrf_exempt
-# def create_product_flutter(request):
-#     if request.method == 'POST':
-
-#         data = json.loads(request.body)
-#         new_product = Phone.objects.create(
-#             user=request.user,
-#             name=data["name"],
-#             price=int(data["price"]),
-#             description = data["description"],
-#         )
-
-#         new_product.save()
-
-#         return JsonResponse({"status": "success"}, status=200)
-#     else:
-#         return JsonResponse({"status": "error"}, status=401)
