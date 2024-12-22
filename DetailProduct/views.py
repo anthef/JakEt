@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from Authenticate.models import UserData
 from DetailProduct.forms import ReviewForm
 from Homepage.models import Phone
 from .models import Review
@@ -259,9 +260,7 @@ def delete_review_flutter(request, review_id):
                     'status': 'error',
                     'message': 'Anda tidak memiliki izin untuk menghapus review ini.'
                 }, status=403)
-
             review.delete()
-
             return JsonResponse({
                 'status': 'success',
                 'message': 'Review berhasil dihapus.'

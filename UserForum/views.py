@@ -127,7 +127,6 @@ def add_discussion_flutter(request):
                 owner=request.user,
                 topic=topic
             )
-
             return JsonResponse({
                 'discussion': model_to_dict(new_discussion),
                 'status': 'success'
