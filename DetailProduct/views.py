@@ -283,6 +283,11 @@ def delete_review_flutter(request, review_id):
             'message': 'Metode request tidak diizinkan.'
         }, status=405)
 
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Phone, Review, UserData  # Pastikan import model yang benar
+from django.conf import settings
+
 def list_reviews_flutter(request, product_id):
     if request.method == 'GET':
         try:
@@ -290,12 +295,25 @@ def list_reviews_flutter(request, product_id):
             reviews = Review.objects.filter(product=product).order_by('-date_added')
             review_data = []
             for review in reviews:
-                profile_image_url = getattr(review.user, 'profile_image_url', '')
+                try:
+                    user_data = review.user.auth  # Menggunakan related_name='auth'
+                    if user_data.profile_picture and hasattr(user_data.profile_picture, 'url'):
+                        profile_image_url = user_data.profile_picture.url
+                    else:
+                        profile_image_url = '/static/images/default_profile.png'
+                except UserData.DoesNotExist:
+                    profile_image_url = '/static/images/default_profile.png'
+                except Exception:
+                    profile_image_url = '/static/images/default_profile.png'
+                
+                if not profile_image_url.startswith('http'):
+                    profile_image_url = request.build_absolute_uri(profile_image_url)
+                
                 review_data.append({
                     'id': review.id,
                     'user': {
                         'username': review.user.username,
-                        'profile_image_url': profile_image_url if profile_image_url else '/static/images/default_profile.png' 
+                        'profile_image_url': profile_image_url
                     },
                     'content': review.content,
                     'rating': review.rating,
@@ -323,3 +341,4 @@ def list_reviews_flutter(request, product_id):
             'status': 'error',
             'message': 'Metode request tidak diizinkan.'
         }, status=405)
+
